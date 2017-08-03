@@ -50,3 +50,5 @@ Navigate to `localhost:3000` to test SunGear with fake data (at this time, the d
 ## Background
 
 SunGear started as a research project in late 2015 when [Professor Dennis Shasha](http://www.cs.nyu.edu/shasha/) approached Radhika Mattoo and Dennis McDaid with the opportunity to re-invent a gene analysis application being used by the NYU Biology department. The original Java applet was written around 2004 by [Chris Poultney](https://scholar.google.com/citations?user=llt18PUAAAAJ&hl=en), and had grown outdated in the midst of the recent web app revolution. The task started out as a simple translation of legacy code from Java to JavaScript, but over the course of nearly a full year evolved into a crash course on full stack web development, total immersion in modern JavaScript development, and an unfathomable amount of red bulls consumed. As of September 2016, SunGear is nearly finished (minus a feature or two), and will be deployed within the month.
+
+It is now being worked on by Jonathan Kogan and Robert Taddeo.
