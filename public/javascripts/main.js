@@ -10,17 +10,23 @@
 const p5 = require('p5');
 const VisGene = require('./app/visGene');
 const Signal = require('./app/signal');
-
+//const fff = require('./fonts/Helvetica-Regular.ttf');
+//console.log(fff);
 let args = [ "" ];
 let vis;
-
+let font;
 new p5(function(p5) {
     let WIDTH;
     let HEIGHT;
     let canvas;
     let debug = false;
 
+    p5.preload = function() {
+        
+    };
+
     p5.setup = function() {
+        font = p5.loadFont('https://fonts.googleapis.com/css?family=Roboto');
         WIDTH = document.getElementById('sungearGui').offsetWidth;
         HEIGHT = document.getElementById('sungearGui').offsetHeight;
         canvas = p5.createCanvas(WIDTH,HEIGHT);
