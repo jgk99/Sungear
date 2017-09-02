@@ -22,7 +22,7 @@ new p5(function(p5) {
     let debug = false;
 
     p5.preload = function() {
-        font = p5.loadFont("./javascripts/fonts/Helvetica-Regular.ttf");
+        font = p5.loadFont("./fonts/Helvetica-Regular.ttf");
     };
 
     p5.setup = function() {

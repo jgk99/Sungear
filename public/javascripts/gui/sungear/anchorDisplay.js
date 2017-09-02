@@ -12,8 +12,10 @@ const SunValues = require('./sunValues');
 
 function AnchorDisplay(anchor) {
     this.anchor = anchor;       /** {Anchor} 1 to 1 relationship */
+    this.bolding = false;
     this.highlight = false;
     this.select = false;
+    this.pressed = false;
     this.showLongDesc = false;  /** {boolean} True to show long anchor description, false for short */
     this._scale = 1;            /** {number} double */
     // this.textScale = 1;         /** {Number} double Scale for text size. Possibly unused? */
@@ -74,6 +76,9 @@ AnchorDisplay.prototype = {
     /** @param b {boolean} */
     setHighlight : function(b) {
         this.highlight = b;
+    },
+    setBolding : function(b) {
+        this.bolding = b;
     },
     /** @return {boolean} */
     getHighlight : function() {
@@ -137,13 +142,12 @@ AnchorDisplay.prototype = {
         let bound = this.bounds;
         let center = {x: tx, y : ty};
         let radius = off + tm/1.19;
-        let tempAngle = this.angle -  Math.PI / 2.;
-        let ang = tempAngle; 
-        let anchorCoor = {x : center.x + radius * Math.cos(-1 * ang + Math.PI / 2), y: center.y - radius * Math.sin(-1 * ang + Math.PI / 2)};
+        let tempAngle = this.angle + Math.PI / 2.;
+        let anchorCoor = {x : center.x + radius * Math.cos(-1 * tempAngle + Math.PI / 2), y: center.y - radius * Math.sin(-1 * tempAngle + Math.PI / 2)};
         let anchorPointCombos = [[bound.w / 1.95 + 5, bound.h / 1.95 + 5],[bound.w / 1.95 + 5, -bound.h / 1.95 - 5], [-bound.w / 1.95 - 5, -bound.h / 1.95 - 5], [-bound.w / 1.95 -5, bound.h / 1.95 + 5]].map(
             wh=> [anchorCoor.x + wh[0], anchorCoor.y + wh[1]]
             );
-        let anchorCorners = this.rotateTransform(anchorPointCombos, -ang, [anchorCoor.x , anchorCoor.y]);;
+        let anchorCorners = this.rotateTransform(anchorPointCombos, -tempAngle, [anchorCoor.x , anchorCoor.y]);;
         
         let anchorCornersForContains = [{x: anchorCorners[0][0],y: anchorCorners[0][1]},{x: anchorCorners[1][0],y: anchorCorners[1][1]},{x: anchorCorners[2][0],y: anchorCorners[2][1]},{x: anchorCorners[3][0],y: anchorCorners[3][1]}];
         let rectangleEdges = [[0,1], [1,2], [2,3], [3,0]];
@@ -151,12 +155,15 @@ AnchorDisplay.prototype = {
         
 
         let containsQ2 = this.polygonContainsQ(4, anchorCorners.map(pt => pt[0]), anchorCorners.map(pt => pt[1]), p5.mouseX, p5.mouseY);
-        
+        p5.textFont("Helvetica");
+        this.pressed = false;
         if (containsQ2) {
             if (p5.mouseIsPressed) {
                 color = SunValues.C_SELECT;
+                this.pressed = true;
             } else {
                 color = SunValues.C_HIGHLIGHT;
+
             }
             this.contains = true;
         } else {
@@ -164,34 +171,16 @@ AnchorDisplay.prototype = {
         }
         p5.fill(color);
 
-
-
-
-        /*p5.push();
-        //noinspection JSCheckFunctionSignatures
-
-        p5.translate(tx, ty);
-        p5.rotate(ang);
-        const anotherRotateX = off + tm/1.2;
-        p5.translate(anotherRotateX, 0);
-        const newAngle = this.angle < Math.PI ? -Math.PI/2.0 : Math.PI/2.0;
-        //p5.rotate(newAngle);
-        if (ang < 3 * Math.PI / 2 && ang > Math.PI / 2){
-            p5.rotate(Math.PI);
+        if (this.bolding){
+            p5.textFont("Helvetica-Bold");
         }
-        const finalRotateX = -0.5;
-        const finalRotateY = 7*scale;
-        p5.translate(finalRotateX, finalRotateY);
 
-        
-        p5.text(l, 0, 0);
-        p5.pop();*/
 
         p5.push();
         p5.translate(center.x, center.y);
-        p5.rotate(ang);
+        p5.rotate(tempAngle);
         p5.translate(0, -radius);
-        if (this.angle > Math.PI){
+        if (this.angle < Math.PI){
             p5.rotate(Math.PI);
         }
         p5.text(l, 0, 0);

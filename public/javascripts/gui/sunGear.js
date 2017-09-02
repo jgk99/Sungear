@@ -47,6 +47,7 @@ function SunGear(genes, thresh, statsF) {
     this.polarPlot = false;
     this.showArrows = true;
     this.minRadIdx = 0;
+    this.justSelectedAnchor = -1;
 
     this.prevB = new Icons.ArrowIcon(2, 4, false);
     this.selB = new Icons.EllipseIcon(3, false);
@@ -687,7 +688,11 @@ SunGear.prototype = {
      */
     getAnchor : function() {
         for (let i = 0; i < this.anchors.length; i++) {
+            if (this.anchors[i].pressed){
+                    this.justSelectedAnchor = i;
+                }
             if (this.anchors[i].contains) {
+                
                 return this.anchors[i];
             }
         }
@@ -715,6 +720,8 @@ SunGear.prototype = {
         for (let i = 0; i < this.anchors.length; i++) {
             chg = chg || (this.anchors[i].getSelect() != (this.anchors[i] == a));
             this.anchors[i].setSelect(this.anchors[i] == a);
+            
+           
         }
         const v = this.getVessel();
         for (let i = 0; i < this.vessels.length; i++) {
@@ -722,6 +729,7 @@ SunGear.prototype = {
             this.vessels[i].setSelect(this.vessels[i] == v);
         }
     },
+
     setMulti : function(b) {
         this.multi = b;
         if (!b) {
@@ -756,6 +764,7 @@ SunGear.prototype = {
                     if (this.cmdClickMac(p5) || this.ctrlClickWin(p5)) {
                         console.log("aight");
                         a.setSelect(!a.getSelect());
+
                     }
                 } else {
                     for (let i = 0; i < this.anchors.length; i++) {
@@ -980,6 +989,10 @@ SunGear.prototype = {
         for (let i = 0; i < this.anchors.length; i++) {
             if (this.anchors[i] != this.lastAnchor) {
                 this.anchors[i].setBounds(font.textBounds(this.anchors[i].getAnchorToShow(), 0, 0, 18));
+                
+                this.anchors[i].setBolding(i == this.justSelectedAnchor);
+               
+               
                 this.anchors[i].draw(p5, drawT, font);
             }
         }
