@@ -986,15 +986,20 @@ SunGear.prototype = {
         p5.pop();
         p5.pop();
         p5.push();
+
         for (let i = 0; i < this.anchors.length; i++) {
             if (this.anchors[i] != this.lastAnchor) {
                 this.anchors[i].setBounds(font.textBounds(this.anchors[i].getAnchorToShow(), 0, 0, 18));
                 
-                this.anchors[i].setBolding(i == this.justSelectedAnchor);
+                //uncomment to allow bolding
+                //this.anchors[i].setBolding(i == this.justSelectedAnchor);
                
-               
-                this.anchors[i].draw(p5, drawT, font);
+                
+                this.anchors[i].draw(p5, drawT);
             }
+        }
+        if (p5.mouseIsPressed) {
+            this.justSelectedAnchor = -1;
         }
         // draw current mouse-over anchor last, if any?
         if (this.lastAnchor !== null) {
@@ -1254,6 +1259,7 @@ SunGear.prototype = {
      * @param p5
      */
     paintExterior : function(p5) {
+
         p5.stroke(SunValues.C_PLAIN);
         p5.fill(SunValues.C_BACKGROUND);
         p5.strokeWeight(.025);
