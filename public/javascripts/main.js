@@ -10,7 +10,7 @@
 const p5 = require('p5');
 const VisGene = require('./app/visGene');
 const Signal = require('./app/signal');
-//const fff = require('./fonts/Helvetica-Regular.ttf');
+//const fff = require('./fonts/Helvetica-Regular');
 //console.log(fff);
 let args = [ "" ];
 let vis;
@@ -22,11 +22,11 @@ new p5(function(p5) {
     let debug = false;
 
     p5.preload = function() {
-        
+        font = p5.loadFont("./javascripts/fonts/Helvetica-Regular.ttf");
     };
 
     p5.setup = function() {
-        font = p5.loadFont('https://fonts.googleapis.com/css?family=Roboto');
+
         WIDTH = document.getElementById('sungearGui').offsetWidth;
         HEIGHT = document.getElementById('sungearGui').offsetHeight;
         canvas = p5.createCanvas(WIDTH,HEIGHT);
@@ -34,16 +34,25 @@ new p5(function(p5) {
         p5.textSize(30);
         p5.textAlign(p5.CENTER);
         vis = VisGene.main(args);
+
     };
     p5.draw = function() {
+        //let bounds = font.textBounds("anchor", 50,50,18);
         p5.background("#111111");
-        vis.gear.paintComponent(p5);
+        vis.gear.paintComponent(p5, font);
         vis.gear.makeButtons(p5);
 
         p5.fill("#ffffff");
         if (debug) {
             p5.text(p5.mouseX + ", " + p5.mouseY, 100, 100);
         }
+        /*p5.fill(255,0,0);
+        p5.rectMode(p5.CENTER);
+        p5.rect(0 + bounds.w /2 , 0 + bounds.h /2 , bounds.w, bounds.h);
+        p5.textSize(18);
+        p5.fill(255);
+        p5.text("anchor", bounds.w /2, bounds.h /2)*/
+
     };
 
     p5.mouseMoved = function() {

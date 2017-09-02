@@ -28,6 +28,8 @@ function AnchorDisplay(anchor) {
     this.contains = false;
     this.debug = true;
     // this.physLocation = {}; /** X & Y locations of name in sungear */
+
+    this.bounds = null;
 }
 
 AnchorDisplay.NAME_SEPARATOR = ";";
@@ -50,8 +52,16 @@ AnchorDisplay.prototype = {
      * This function should be called on each unique AnchorDisplay to offset their angles from the gear's center.
      * Likely calling function is SunValues.makeDisplay
      *
-     * @param theta {Number} double
+     *
      */
+    getAnchorToShow : function(){
+        return this.showLongDesc ? this.longDesc : this.shortDesc;
+    },
+
+    setBounds : function(bounds) {
+        this.bounds = bounds;
+    },
+    // @param theta {Number} double
     setAngle : function(theta) {
         this.angle = theta;
         this.position.x = SunValues.R_CIRCLE * Math.cos(theta);
@@ -112,31 +122,37 @@ AnchorDisplay.prototype = {
         const tm = Math.min(tx, ty);
         const scale = drawT.scale / 192.91666666666669;
         const off = 34*scale;
-
-        p5.push();
         p5.textSize(18);
-        //noinspection JSCheckFunctionSignatures
-        p5.textAlign(p5.CENTER);
-        p5.textFont("Helvetica");
+        p5.textAlign(p5.CENTER, p5.CENTER);
+        const l = this.getAnchorToShow();
 
-        const l = this.showLongDesc ? this.longDesc : this.shortDesc;
-
-        const location = this.findAnchorCorner(tx, ty, tm, off);
-
-
-        p5.translate(tx, ty);
-        p5.rotate(this.angle);
-        const anotherRotateX = off + tm/1.2;
-        p5.translate(anotherRotateX, 0);
-        const newAngle = this.angle < Math.PI ? -Math.PI/2.0 : Math.PI/2.0;
-        p5.rotate(newAngle);
-        const finalRotateX = -0.5;
-        const finalRotateY = 7*scale;
-        p5.translate(finalRotateX, finalRotateY);
 
         let color = SunValues.C_PLAIN;
         color = (this.select ? SunValues.C_SELECT : (this.highlight ? SunValues.C_HIGHLIGHT : color));
-        if ( p5.dist(p5.mouseX, p5.mouseY, location.x, location.y) < (l.length*6)  ) {
+        
+        const location = this.findAnchorCorner(tx, ty, tm, off);
+
+    
+
+        let bound = this.bounds;
+        let center = {x: tx, y : ty};
+        let radius = off + tm/1.19;
+        let tempAngle = this.angle -  Math.PI / 2.;
+        let ang = tempAngle; 
+        let anchorCoor = {x : center.x + radius * Math.cos(-1 * ang + Math.PI / 2), y: center.y - radius * Math.sin(-1 * ang + Math.PI / 2)};
+        let anchorPointCombos = [[bound.w / 1.95 + 5, bound.h / 1.95 + 5],[bound.w / 1.95 + 5, -bound.h / 1.95 - 5], [-bound.w / 1.95 - 5, -bound.h / 1.95 - 5], [-bound.w / 1.95 -5, bound.h / 1.95 + 5]].map(
+            wh=> [anchorCoor.x + wh[0], anchorCoor.y + wh[1]]
+            );
+        let anchorCorners = this.rotateTransform(anchorPointCombos, -ang, [anchorCoor.x , anchorCoor.y]);;
+        
+        let anchorCornersForContains = [{x: anchorCorners[0][0],y: anchorCorners[0][1]},{x: anchorCorners[1][0],y: anchorCorners[1][1]},{x: anchorCorners[2][0],y: anchorCorners[2][1]},{x: anchorCorners[3][0],y: anchorCorners[3][1]}];
+        let rectangleEdges = [[0,1], [1,2], [2,3], [3,0]];
+
+        
+
+        let containsQ2 = this.polygonContainsQ(4, anchorCorners.map(pt => pt[0]), anchorCorners.map(pt => pt[1]), p5.mouseX, p5.mouseY);
+        
+        if (containsQ2) {
             if (p5.mouseIsPressed) {
                 color = SunValues.C_SELECT;
             } else {
@@ -147,8 +163,48 @@ AnchorDisplay.prototype = {
             this.contains = false;
         }
         p5.fill(color);
+
+
+
+
+        /*p5.push();
+        //noinspection JSCheckFunctionSignatures
+
+        p5.translate(tx, ty);
+        p5.rotate(ang);
+        const anotherRotateX = off + tm/1.2;
+        p5.translate(anotherRotateX, 0);
+        const newAngle = this.angle < Math.PI ? -Math.PI/2.0 : Math.PI/2.0;
+        //p5.rotate(newAngle);
+        if (ang < 3 * Math.PI / 2 && ang > Math.PI / 2){
+            p5.rotate(Math.PI);
+        }
+        const finalRotateX = -0.5;
+        const finalRotateY = 7*scale;
+        p5.translate(finalRotateX, finalRotateY);
+
+        
+        p5.text(l, 0, 0);
+        p5.pop();*/
+
+        p5.push();
+        p5.translate(center.x, center.y);
+        p5.rotate(ang);
+        p5.translate(0, -radius);
+        if (this.angle > Math.PI){
+            p5.rotate(Math.PI);
+        }
         p5.text(l, 0, 0);
         p5.pop();
+
+        /*
+        *This is for seeing where the boxes around anchors are
+        p5.fill(100);
+        anchorCorners.map(pt => p5.ellipse(pt[0], pt[1], 10, 10));
+        p5.stroke(255);
+        rectangleEdges.map(pair => p5.line(anchorCornersForContains[pair[0]].x, anchorCornersForContains[pair[0]].y, anchorCornersForContains[pair[1]].x, anchorCornersForContains[pair[1]].y));
+        */
+
 
         // //we have the location wrt the rotated/translated set.
         // //want to convert these to the original coordinates
@@ -225,6 +281,30 @@ AnchorDisplay.prototype = {
      */
     compareTo : function(a) {
         return this.anchor.compareTo(a.anchor);
+    },
+
+    translateTransform : function(m,translationVector){
+    return m.map(v => [v[0] + translationVector[0], v[1] + translationVector[1]]);
+    },
+    //hacky way because it was easier than importing library for dot product
+    rotateTransform : function(m, ang, anchorVector){
+        let firstTransVector = anchorVector.map(coor => -1 * coor);
+        let shiftedM = this.translateTransform(m, firstTransVector);
+        let rotatedM = shiftedM.map(pt => [pt[0] * Math.cos(ang) + pt[1] * Math.sin(ang), pt[1] * Math.cos(ang) - pt[0] * Math.sin(ang)]);
+        let finalM = this.translateTransform(rotatedM, anchorVector);
+        return finalM;
+    },
+
+    //it's cool cause it works
+    polygonContainsQ: function(nvert, vertx, verty, testx, testy){
+      let i, j, c = 0;
+      for (i = 0, j = nvert-1; i < nvert; j = i++) {
+        if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+         (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) ){
+           c = !c;
+        }
+      }
+      return c;
     }
 };
 

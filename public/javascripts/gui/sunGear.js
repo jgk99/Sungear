@@ -958,7 +958,7 @@ SunGear.prototype = {
             }
         }
     },
-    paintComponent : function(p5) {
+    paintComponent : function(p5, font) {
         p5.push();
         this.makeTransform(p5, this.WIDTH, this.HEIGHT);
         p5.push();
@@ -979,7 +979,8 @@ SunGear.prototype = {
         p5.push();
         for (let i = 0; i < this.anchors.length; i++) {
             if (this.anchors[i] != this.lastAnchor) {
-                this.anchors[i].draw(p5, drawT);
+                this.anchors[i].setBounds(font.textBounds(this.anchors[i].getAnchorToShow(), 0, 0, 18));
+                this.anchors[i].draw(p5, drawT, font);
             }
         }
         // draw current mouse-over anchor last, if any?
@@ -991,7 +992,8 @@ SunGear.prototype = {
         p5.push();
         p5.textSize(18);
         p5.textAlign(p5.RIGHT);
-        p5.textFont("Helvetica");
+        //console.log(font.textBounds("Hello",0,0,18));
+        p5.textFont(font);
         p5.fill(SunValues.C_HIGHLIGHT);
         p5.text(this.highCnt+"", this.WIDTH-10, 18);
         p5.fill(SunValues.C_PLAIN);
